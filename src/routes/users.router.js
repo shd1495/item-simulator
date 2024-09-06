@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
@@ -74,7 +75,9 @@ router.post('/sign_in', async (req, res, next) => {
   if (!(await bcrypt.compare(password, user.password)))
     return res.status(401).json({ message: '비밀번호가 일치하지 않습니다.' });
 
-  return res.status(200).json({ message: '로그인에 성공했습니다.' });
+  const token = jwt.sign({ user_id: user.user_id }, 'custom-secret-key', { expiresIn: '1h' });
+
+  return res.status(200).json({ message: '로그인에 성공했습니다.', token });
 });
 
 export default router;
