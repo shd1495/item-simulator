@@ -29,11 +29,13 @@ router.post('/sign_up', async (req, res, next) => {
       .max(15)
       .required(),
     password: Joi.string().min(6).max(16).required(),
+    password_check: Joi.string().valid(Joi.ref('password')).required(),
   });
 
   const { error } = schema.validate(req.body);
 
   if (error) {
+    console.error(error.details);
     return res.status(400).json({ message: '양식에 맞게 내용을 입력해주세요.' });
   }
 
