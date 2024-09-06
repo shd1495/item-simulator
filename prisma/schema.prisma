@@ -12,3 +12,65 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model items {
+  item_code Int @id @default(autoincrement()) @map("item_code")
+  item_name String @unique @map("item_name")
+  item_stat Json @map("item_stat")
+  item_price Int @map("item_price")
+
+  character_inventory character_inventory[]
+  character_item character_item[]
+
+  @@map("item")
+}
+
+
+model users {
+  user_id Int @id @default(autoincrement()) @map("user_id")
+  user_name String @map("user_name")
+  id String @unique @map("id")
+  password String @db.Text @map("password")
+
+  char characters[]
+
+  @@map("users")
+}
+
+model characters {
+  char_id Int @id @default(autoincrement()) @map("char_id")
+  user_id Int @map("user_id")
+  name String @unique @map("name")
+  health Int @default(500) @map("health")
+  power Int @default(100) @map("power")
+  money Int @default(10000) @map("money")
+
+  character_inventory character_inventory[]
+  character_item character_item[]
+
+  user users @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  @@map("characters")
+}
+
+model character_inventory {
+  char_id Int @map("char_id")
+  item_code Int @map("item_code")
+  count Int @map("count")
+
+  char characters @relation(fields: [char_id], references: [char_id], onDelete: Cascade)
+  item items @relation(fields: [item_code], references: [item_code], onDelete: Cascade)
+
+  @@id([char_id, item_code])
+  @@map("character_inventory")
+}
+
+model character_item {
+  char_id Int @map("char_id")
+  item_code Int @map("item_code")
+
+  char characters @relation(fields: [char_id], references: [char_id], onDelete: Cascade)
+  item items @relation(fields: [item_code], references: [item_code], onDelete: Cascade)
+
+  @@id([char_id, item_code])
+  @@map("character_item")
+}
