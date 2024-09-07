@@ -4,4 +4,6 @@ node_modules
 
 .husky
 
-commitlint.config.js 
+.prettierrc
+
+commitlint.config.js
