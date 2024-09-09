@@ -1,4 +1,5 @@
 import express from 'express';
+import expressSession from 'express-session';
 import expressMySQLSession from 'express-mysql-session';
 import cookieParser from 'cookie-parser';
 import UsersRouter from './routes/users.router.js';
@@ -24,6 +25,18 @@ const sessionStore = new MySQLStore({
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET_KEY, // 세션을 암호화하는 비밀 키를 설정
+    resave: false, // 클라이언트의 요청이 올 때마다 세션을 새롭게 저장할 지 설정, 변경사항이 없어도 다시 저장
+    saveUninitialized: false, // 세션이 초기화되지 않았을 때 세션을 저장할 지 설정
+    cookie: {
+      // 세션 쿠키 설정
+      maxAge: 1000 * 60 * 60 * 24, // 쿠키의 만료 기간을 1일로 설정합니다.
+    },
+    store: sessionStore, // 외부 세션 스토리지를 sessionStore로 설정
+  }),
+);
 
 app.use('/api', [UsersRouter, CharRouter]);
 
