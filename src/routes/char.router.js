@@ -47,7 +47,7 @@ router.get('/char/:char_id', optionalAuthMiddleware, async (req, res, next) => {
     const char = await prisma.characters.findFirst({
       where: { char_id: +char_id },
     });
-    if (!char) throw Object.assign(new Error('캐릭터가 존재하지 않습니다.'), { status: 400 });
+    if (!char) throw Object.assign(new Error('캐릭터가 존재하지 않습니다.'), { status: 404 });
 
     // 인증 여부에 따른 정보 전달
     if (user && user.user_id === char.user_id) {
@@ -74,7 +74,7 @@ router.delete('/char/:char_id', authMiddleware, async (req, res, next) => {
     const char = await prisma.characters.findFirst({
       where: { char_id: +char_id, user_id: user },
     });
-    if (!char) throw Object.assign(new Error('캐릭터가 존재하지 않습니다.'), { status: 400 });
+    if (!char) throw Object.assign(new Error('캐릭터가 존재하지 않습니다.'), { status: 404 });
 
     // 캐릭터 삭제
     const deletedChar = await prisma.characters.delete({
