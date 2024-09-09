@@ -98,4 +98,22 @@ router.get('/items', async (req, res, next) => {
   }
 });
 
+/**
+ * 아이템 상세 조회 API
+ */
+router.get('/items/:item_code', async (req, res, next) => {
+  try {
+    const { item_code } = req.params;
+
+    const item = await prisma.items.findFirst({
+      where: { item_code: +item_code },
+    });
+    if (!item) throw Object.assign(new Error('아이템이 존재하지 않습니다.'), { status: 404 });
+
+    return res.status(200).json({ data: item });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
