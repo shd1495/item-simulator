@@ -5,6 +5,7 @@ import errorHandlingMiddleware from './middlewares/error.handling.middleware.js'
 import cookieParser from 'cookie-parser';
 import UsersRouter from './routes/users.router.js';
 import CharRouter from './routes/char.router.js';
+import ItemRouter from './routes/item.router.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -39,7 +40,7 @@ app.use(
   }),
 );
 
-app.use('/api', [UsersRouter, CharRouter]);
+app.use('/api', [UsersRouter, CharRouter, ItemRouter]);
 
 app.use(errorHandlingMiddleware);
 
