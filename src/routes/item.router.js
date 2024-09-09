@@ -11,6 +11,7 @@ router.post('/items', async (req, res, next) => {
   const { item_code, item_name, item_stat, item_price } = req.body;
 
   try {
+    // 유효성 검사
     const schema = Joi.object({
       item_code: Joi.number().integer().required(), // 정수만 입력 가능
       item_name: Joi.string()
@@ -27,10 +28,7 @@ router.post('/items', async (req, res, next) => {
 
     const { error } = schema.validate(req.body); // 양식 검증
 
-    if (error) {
-      console.error(error.details);
-      return res.status(400).json({ message: '양식에 맞게 내용을 입력해주세요.' });
-    }
+    if (error) throw Object.assign(new Error('양식에 맞게 내용을 입력해주세요.'), { status: 400 });
 
     const item = await prisma.items.create({
       data: {
