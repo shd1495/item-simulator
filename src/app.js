@@ -1,6 +1,7 @@
 import express from 'express';
 import expressSession from 'express-session';
 import expressMySQLSession from 'express-mysql-session';
+import errorHandlingMiddleware from './middlewares/error.handling.middleware.js';
 import cookieParser from 'cookie-parser';
 import UsersRouter from './routes/users.router.js';
 import CharRouter from './routes/char.router.js';
@@ -39,6 +40,8 @@ app.use(
 );
 
 app.use('/api', [UsersRouter, CharRouter]);
+
+app.use(errorHandlingMiddleware);
 
 app.listen(PORT, () => {
   console.log(PORT, '포트로 서버가 열렸어요!');
