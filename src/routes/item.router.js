@@ -45,4 +45,36 @@ router.post('/items', async (req, res, next) => {
   }
 });
 
+/**
+ * 아이템 수정 API
+ */
+router.patch('/items/:item_code', async (req, res, next) => {
+  const { item_code } = req.params;
+  const { item_name, item_stat } = req.body;
+
+  try {
+    // 아이템 존재 여부
+    const item = await prisma.items.findFirst({
+      where: { item_code: +item_code },
+    });
+
+    if (!item) throw Object.assign(new Error('아이템이 존재하지 않습니다.'), { status: 404 });
+
+    // 수정 사항 반영
+    const updatedItem = await prisma.items.update({
+      data: {
+        item_name,
+        item_stat,
+      },
+      where: {
+        item_code: +item.item_code,
+      },
+    });
+
+    return res.status(200).json({ data: updatedItem });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
