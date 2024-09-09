@@ -12,7 +12,7 @@ export default async function (req, res, next) {
   if (tokenType !== 'Bearer') return next();
 
   try {
-    const user = jwt.verify(token, 'custom-secret-key');
+    const user = jwt.verify(token, process.env.SESSION_SECRET_KEY);
     req.user = user;
   } catch {
     req.user = undefined;
