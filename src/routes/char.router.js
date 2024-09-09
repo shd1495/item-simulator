@@ -41,13 +41,32 @@ router.get('/char/:char_id', optionalAuthMiddleware, async (req, res, next) => {
   });
   if (!char) return res.status(400).json({ message: '캐릭터가 존재하지 않습니다.' });
 
-  if (user.user_id === char.user_id) {
+  if (user && user.user_id === char.user_id) {
     return res
       .status(200)
       .json({ name: char.name, health: char.health, power: char.power, money: char.money });
   } else {
     return res.status(200).json({ name: char.name, health: char.health, power: char.power });
   }
+});
+
+/**
+ * 캐릭터 삭제 API
+ */
+router.delete('/char/:char_id', authMiddleware, async (req, res, next) => {
+  const { char_id } = req.params;
+  const { user } = req.user;
+
+  const char = await prisma.characters.findFirst({
+    where: { char_id: +char_id, user_id: user },
+  });
+  if (!char) return res.status(400).json({ message: '캐릭터가 존재하지 않습니다.' });
+
+  const deletedChar = await prisma.characters.delete({
+    where: { char_id: +char_id, user_id: user },
+  });
+
+  return res.status(200).json({ message: ` ${deletedChar.name} 캐릭터가 삭제되었습니다.` });
 });
 
 export default router;
