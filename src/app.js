@@ -1,12 +1,13 @@
-import express from 'express';
-import expressSession from 'express-session';
-import expressMySQLSession from 'express-mysql-session';
-import errorHandlingMiddleware from './middlewares/error.handling.middleware.js';
-import cookieParser from 'cookie-parser';
-import UsersRouter from './routes/users.router.js';
-import CharRouter from './routes/char.router.js';
-import ItemRouter from './routes/item.router.js';
-import dotenv from 'dotenv';
+import express from "express";
+import expressSession from "express-session";
+import expressMySQLSession from "express-mysql-session";
+import errorHandlingMiddleware from "./middlewares/error.handling.middleware.js";
+import cookieParser from "cookie-parser";
+import UsersRouter from "./routes/users.router.js";
+import CharRouter from "./routes/char.router.js";
+import ItemRouter from "./routes/item.router.js";
+import MarketRouter from "./routes/market.router.js";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -37,13 +38,13 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24, // 쿠키의 만료 기간을 1일로 설정합니다.
     },
     store: sessionStore, // 외부 세션 스토리지를 sessionStore로 설정
-  }),
+  })
 );
 
-app.use('/api', [UsersRouter, CharRouter, ItemRouter]);
+app.use("/api", [UsersRouter, CharRouter, ItemRouter, MarketRouter]);
 
 app.use(errorHandlingMiddleware);
 
 app.listen(PORT, () => {
-  console.log(PORT, '포트로 서버가 열렸어요!');
+  console.log(PORT, "포트로 서버가 열렸어요!");
 });
