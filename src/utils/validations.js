@@ -43,3 +43,17 @@ export async function checkInventory(prisma, char_id, item_code) {
   });
   return isExistItem;
 }
+
+/**
+ * 아이템 착용 여부
+ * @param {*} prisma
+ * @param {*} char_id
+ * @param {*} item_code
+ * @returns
+ */
+export async function checkEquip(prisma, char_id, item_code) {
+  const alreadyEquip = await prisma.character_item.findFirst({
+    where: { char_id: +char_id, item_code: +item_code },
+  });
+  return alreadyEquip;
+}
