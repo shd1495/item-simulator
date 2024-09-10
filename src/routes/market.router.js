@@ -77,4 +77,84 @@ router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
+/**
+ * 아이템 판매 API
+ */
+router.post("/sell/:char_id", authMiddleware, async (req, res, next) => {
+  const { char_id } = req.params;
+  const { item_code, count } = req.body;
+  const { user } = req;
+
+  try {
+    // 캐릭터 존재 여부
+    const char = await prisma.characters.findFirst({
+      where: { char_id: +char_id, user_id: +user.user_id },
+    });
+
+    if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
+
+    // 아이템 존재 여부
+    const item = await prisma.items.findFirst({
+      where: { item_code: +item_code },
+    });
+
+    if (!item) throw throwError("아이템이 존재하지 않습니다.", 404);
+
+    const money = await prisma.$transaction(async (tx) => {
+      // 캐릭터 소지금 변경
+      const updateMoney = await tx.characters.update({
+        data: {
+          // 판매시 60%만 정산
+          money: char.money + (Math.round(item.item_price * 60) / 100) * count, // 정수 연산
+        },
+        where: { char_id: +char_id, user_id: +user.user_id },
+      });
+
+      //  인벤토리에 아이템 소지 여부
+      const isExistItem = await tx.character_inventory.findFirst({
+        where: { item_code: +item_code },
+      });
+
+      if (!isExistItem) {
+        throw throwError("아이템을 소지하고 있지 않습니다.", 404);
+      } else if (isExistItem.count < count) {
+        throw throwError("수량이 부족합니다.", 400);
+      }
+
+      if (isExistItem.count > count) {
+        // 아이템 수량 갱신
+        await tx.character_inventory.update({
+          data: {
+            count: +isExistItem.count - +count,
+          },
+          where: {
+            char_id_item_code: {
+              char_id: +char_id,
+              item_code: +item_code,
+            },
+          },
+        });
+      } else {
+        // 수량이 0이되면 컬럼 삭제
+        await tx.character_inventory.delete({
+          where: {
+            char_id_item_code: {
+              char_id: +char_id,
+              item_code: +item_code,
+            },
+          },
+        });
+      }
+
+      return updateMoney.money;
+    });
+
+    return res.status(200).json({
+      message: `${item.item_name}을 ${count}개 판매하여 ${money} gold가 남았습니다.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 export default router;
