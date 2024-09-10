@@ -95,4 +95,47 @@ router.delete("/char/:char_id", authMiddleware, async (req, res, next) => {
   }
 });
 
+/**
+ * 캐릭터 인벤토리의 아이템 목록 조회 API
+ */
+router.get(
+  "/char/inventory/:char_id",
+  authMiddleware,
+  async (req, res, next) => {
+    const { char_id } = req.params;
+    const { user } = req.user;
+
+    try {
+      // 캐릭터 존재 여부
+      const char = await prisma.characters.findFirst({
+        where: { char_id: +char_id, user_id: user },
+      });
+      if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
+
+      // 인벤토리의 아이템 목록 조회
+      const inventory = await prisma.character_inventory.findMany({
+        where: { char_id: +char_id },
+        select: {
+          item_code: true,
+          item: {
+            select: {
+              item_name: true,
+            },
+          },
+          count: true,
+        },
+      });
+      // 인벤토리 데이터 가공
+      const result = inventory.map((x) => ({
+        item_code: x.item_code,
+        item_name: x.item.item_name,
+        count: x.count,
+      }));
+
+      return res.status(200).json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 export default router;
