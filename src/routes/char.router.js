@@ -51,7 +51,7 @@ router.get("/char/:char_id", optionalAuthMiddleware, async (req, res, next) => {
     if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
 
     // 인증 여부에 따른 정보 전달
-    if (user === char.user_id) {
+    if (user.user_id === char.user_id) {
       return res.status(200).json({
         name: char.name,
         health: char.health,
@@ -78,11 +78,10 @@ router.delete("/char/:char_id", authMiddleware, async (req, res, next) => {
   try {
     // 캐릭터 존재 여부
     const char = await checkChar(prisma, char_id, user.user_id);
-    if (!char) throw throwError("캐릭터 정보가 없거나 권한이 없습니다.", 403);
 
     // 캐릭터 삭제
     const deletedChar = await prisma.characters.delete({
-      where: { char_id: +char_id, user_id: user.user_id },
+      where: { char_id: +char_id, user_id: +user.user_id },
     });
 
     return res
@@ -105,7 +104,7 @@ router.get(
 
     try {
       // 캐릭터 존재 여부
-      await checkChar(prisma, char_id, user.user_id);
+      const char = await checkChar(prisma, char_id, user.user_id);
 
       // 인벤토리의 아이템 목록 조회
       const inventory = await prisma.character_inventory.findMany({
@@ -169,5 +168,13 @@ router.get("/char/equip/:char_id", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+router.patch("/char/:char_id", authMiddleware, async (req, res, next) => {
+  const { char_id } = req.params;
+  const { user } = req;
+
+  // 캐릭터 존재 여부
+  const char = await checkChar(prisma, char_id, user.user_id);
 });
 export default router;

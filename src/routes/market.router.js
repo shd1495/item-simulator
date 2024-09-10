@@ -12,11 +12,11 @@ const router = express.Router();
 router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
   const { char_id } = req.params;
   const { item_code, count } = req.body;
-  const { user } = req.user;
+  const { user } = req;
 
   try {
     // 캐릭터 존재 여부
-    const char = await checkChar(prisma, char_id, user);
+    const char = await checkChar(prisma, char_id, user.user_id);
 
     // 아이템 존재 여부
     const item = await checkItem(prisma, item_code);
@@ -32,7 +32,7 @@ router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
       // 캐릭터 소지금 변경
       const updateMoney = await tx.characters.update({
         data: { money: char.money - item.item_price * count },
-        where: { char_id: +char_id, user_id: +user },
+        where: { char_id: +char_id, user_id: +user.user_id },
       });
 
       if (!inventory) {
@@ -75,11 +75,11 @@ router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
 router.post("/sell/:char_id", authMiddleware, async (req, res, next) => {
   const { char_id } = req.params;
   const { item_code, count } = req.body;
-  const { user } = req.user;
+  const { user } = req;
 
   try {
     // 캐릭터 존재 여부
-    const char = await checkChar(prisma, char_id, user);
+    const char = await checkChar(prisma, char_id, user.user_id);
 
     // 아이템 존재 여부
     const item = await checkItem(prisma, item_code);
@@ -100,7 +100,7 @@ router.post("/sell/:char_id", authMiddleware, async (req, res, next) => {
           // 판매시 60%만 정산
           money: char.money + (Math.round(item.item_price * 60) / 100) * count, // 정수 연산
         },
-        where: { char_id: +char_id, user_id: +user },
+        where: { char_id: +char_id, user_id: +user.user_id },
       });
 
       if (inventory.count > count) {

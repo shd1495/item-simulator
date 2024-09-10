@@ -8,9 +8,21 @@ import { throwError } from "../utils/utils.js";
  * @returns { object }
  */
 export async function checkChar(prisma, char_id, user_id) {
+  // 본인 계정의 캐릭터가 맞는지 검증
   const char = await prisma.characters.findFirst({
     where: { char_id: +char_id, user_id: +user_id },
   });
+  // 본인 계정이 아닐 경우 에러 처리를 위한 분기
+  if (!char) {
+    const exist = await prisma.characters.findUnique({
+      where: { char_id: +char_id },
+    });
+    if (!exist) {
+      throw throwError("캐릭터를 찾을 수 없습니다.", 404);
+    } else {
+      throw throwError("권한이 없습니다.", 403);
+    }
+  }
   return char;
 }
 
