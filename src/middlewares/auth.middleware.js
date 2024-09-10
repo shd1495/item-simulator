@@ -7,7 +7,7 @@ export default async function (req, res, next) {
 
     // 토큰 존재 여부
     if (!authorization)
-      throw new Error("요청한 사용자의 토큰이 존재하지 않습니다.", 401);
+      throw new Error("요청한 사용자의 토큰이 존재하지 않습니다.", 404);
 
     // 토큰 타입 확인
     const [tokenType, token] = authorization.split(" ");

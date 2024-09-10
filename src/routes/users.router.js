@@ -76,7 +76,7 @@ router.post("/sign_in", async (req, res, next) => {
 
     // 해싱된 비밀번호 비교
     if (!(await bcrypt.compare(password, user.password)))
-      throw throwError("비밀번호가 일치하지 않습니다", 400);
+      throw throwError("비밀번호가 일치하지 않습니다", 401);
 
     const token = jwt.sign(
       { user_id: user.user_id },
