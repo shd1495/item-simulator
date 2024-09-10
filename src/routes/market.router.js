@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma } from "../utils/prisma/index.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
+import { throwError } from "../utils/utils.js";
 
 const router = express.Router();
 
@@ -18,26 +19,18 @@ router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
       where: { char_id: +char_id, user_id: +user.user_id },
     });
 
-    if (!char)
-      throw Object.assign(new Error("캐릭터가 존재하지 않습니다."), {
-        status: 404,
-      });
+    if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
 
     // 아이템 존재 여부
     const item = await prisma.items.findFirst({
       where: { item_code: +item_code },
     });
 
-    if (!item)
-      throw Object.assign(new Error("아이템이 존재하지 않습니다."), {
-        status: 404,
-      });
+    if (!item) throw throwError("아이템이 존재하지 않습니다.", 404);
 
     // 아이템을 살 소지금이 충분한지 판별
     if (char.money < item.item_price * count)
-      throw Object.assign(new Error("소지금이 부족합니다."), {
-        status: 400,
-      });
+      throw throwError("소지금이 부족합니다.", 400);
 
     const money = await prisma.$transaction(async (tx) => {
       // 캐릭터 소지금 변경

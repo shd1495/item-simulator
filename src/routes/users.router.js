@@ -1,21 +1,22 @@
-import express from 'express';
-import { prisma } from '../utils/prisma/index.js';
-import bcrypt from 'bcrypt';
-import Joi from 'joi';
-import jwt from 'jsonwebtoken';
+import express from "express";
+import { prisma } from "../utils/prisma/index.js";
+import { throwError } from "../utils/utils.js";
+import bcrypt from "bcrypt";
+import Joi from "joi";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
 /**
  * 회원 가입 API
  */
-router.post('/sign_up', async (req, res, next) => {
+router.post("/sign_up", async (req, res, next) => {
   const { user_name, id, password, password_check } = req.body;
 
   try {
     // 비밀번호 일치 여부
     if (password !== password_check)
-      throw Object.assign(new Error('두 비밀번호가 일치하지 않습니다.'), { status: 400 });
+      throw throwError("두 비밀번호가 일치하지 않습니다.", 400);
 
     // 유효성 검사
     const schema = Joi.object({
@@ -30,22 +31,19 @@ router.post('/sign_up', async (req, res, next) => {
         .max(15)
         .required(),
       password: Joi.string().min(6).max(16).required(),
-      password_check: Joi.string().valid(Joi.ref('password')).required(),
+      password_check: Joi.string().valid(Joi.ref("password")).required(),
     });
 
     const { error } = schema.validate(req.body);
 
-    if (error) {
-      console.error(error.details);
-      throw Object.assign(new Error('양식에 맞게 내용을 입력해주세요'), { status: 400 });
-    }
+    if (error) throw throwError("양식에 맞게 내용을 입력해주세요", 400);
 
     // DB에 같은 ID가 이미 존재하는지 확인
     const isExistUser = await prisma.users.findFirst({
       where: { id },
     });
 
-    if (isExistUser) throw Object.assign(new Error('이미 존재하는 ID입니다.'), { status: 409 });
+    if (isExistUser) throw throwError("이미 존재하는 ID입니다.", 409);
 
     // bcrypt로 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -58,7 +56,7 @@ router.post('/sign_up', async (req, res, next) => {
       },
     });
 
-    return res.status(201).json({ message: '회원 가입이 완료되었습니다.' });
+    return res.status(201).json({ message: "회원 가입이 완료되었습니다." });
   } catch (error) {
     next(error);
   }
@@ -67,7 +65,7 @@ router.post('/sign_up', async (req, res, next) => {
 /**
  * 로그인 API
  */
-router.post('/sign_in', async (req, res, next) => {
+router.post("/sign_in", async (req, res, next) => {
   const { id, password } = req.body;
 
   try {
@@ -76,17 +74,21 @@ router.post('/sign_in', async (req, res, next) => {
       where: { id },
     });
 
-    if (!user) throw Object.assign(new Error('존재하지 않는 ID입니다'), { status: 401 });
+    if (!user) throw throwError("존재하지 않는 ID입니다", 404);
 
     // 해싱된 비밀번호 비교
     if (!(await bcrypt.compare(password, user.password)))
-      throw Object.assign(new Error('비밀번호가 일치하지 않습니다'), { status: 401 });
+      throw throwError("비밀번호가 일치하지 않습니다", 400);
 
-    const token = jwt.sign({ user_id: user.user_id }, process.env.SESSION_SECRET_KEY, {
-      expiresIn: '1d',
-    });
+    const token = jwt.sign(
+      { user_id: user.user_id },
+      process.env.SESSION_SECRET_KEY,
+      {
+        expiresIn: "1d",
+      }
+    );
 
-    return res.status(200).json({ message: '로그인에 성공했습니다.', token });
+    return res.status(200).json({ message: "로그인에 성공했습니다.", token });
   } catch (error) {
     next(error);
   }
