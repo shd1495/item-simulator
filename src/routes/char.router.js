@@ -170,11 +170,29 @@ router.get("/char/equip/:char_id", async (req, res, next) => {
   }
 });
 
+/**
+ * 게임 머니 획득 API
+ */
 router.patch("/char/:char_id", authMiddleware, async (req, res, next) => {
   const { char_id } = req.params;
   const { user } = req;
 
-  // 캐릭터 존재 여부
-  const char = await checkChar(prisma, char_id, user.user_id);
+  try {
+    // 캐릭터 존재 여부
+    const char = await checkChar(prisma, char_id, user.user_id);
+
+    const updatedChar = await prisma.characters.update({
+      data: {
+        money: +char.money + 100,
+      },
+      where: { char_id: +char_id },
+    });
+
+    return res.status(200).json({
+      message: `100 gold를 획득하여 ${updatedChar.money} gold가 되었습니다.`,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 export default router;
