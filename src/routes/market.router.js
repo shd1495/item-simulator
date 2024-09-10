@@ -2,6 +2,7 @@ import express from "express";
 import { prisma } from "../utils/prisma/index.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { throwError } from "../utils/utils.js";
+import { checkChar, checkItem, checkInventory } from "../utils/validations.js";
 
 const router = express.Router();
 
@@ -15,22 +16,17 @@ router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
 
   try {
     // 캐릭터 존재 여부
-    const char = await prisma.characters.findFirst({
-      where: { char_id: +char_id, user_id: +user.user_id },
-    });
-
-    if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
+    const char = await checkChar(prisma, char_id, user.user_id);
 
     // 아이템 존재 여부
-    const item = await prisma.items.findFirst({
-      where: { item_code: +item_code },
-    });
-
-    if (!item) throw throwError("아이템이 존재하지 않습니다.", 404);
+    const item = await checkItem(prisma, item_code);
 
     // 아이템을 살 소지금이 충분한지 판별
     if (char.money < item.item_price * count)
       throw throwError("소지금이 부족합니다.", 400);
+
+    //  인벤토리에 아이템 소지 여부
+    const inventory = await checkInventory(prisma, char_id, item_code);
 
     const money = await prisma.$transaction(async (tx) => {
       // 캐릭터 소지금 변경
@@ -39,12 +35,7 @@ router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
         where: { char_id: +char_id, user_id: +user.user_id },
       });
 
-      // 아이템 소지 여부
-      const isExistItem = await tx.character_inventory.findFirst({
-        where: { item_code: +item_code },
-      });
-
-      if (!isExistItem) {
+      if (!inventory) {
         // 아이템을 소지하고 있지 않을 경우 생성
         await tx.character_inventory.create({
           data: {
@@ -57,7 +48,7 @@ router.post("/buy/:char_id", authMiddleware, async (req, res, next) => {
         // 아이템을 이미 소지하고 있을 경우 수량 갱신
         await tx.character_inventory.update({
           data: {
-            count: +isExistItem.count + +count,
+            count: +inventory.count + +count,
           },
           where: {
             char_id_item_code: {
@@ -88,18 +79,19 @@ router.post("/sell/:char_id", authMiddleware, async (req, res, next) => {
 
   try {
     // 캐릭터 존재 여부
-    const char = await prisma.characters.findFirst({
-      where: { char_id: +char_id, user_id: +user.user_id },
-    });
-
-    if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
+    const char = await checkChar(prisma, char_id, user.user_id);
 
     // 아이템 존재 여부
-    const item = await prisma.items.findFirst({
-      where: { item_code: +item_code },
-    });
+    const item = await checkItem(prisma, item_code);
 
-    if (!item) throw throwError("아이템이 존재하지 않습니다.", 404);
+    //  인벤토리에 아이템 소지 여부
+    const inventory = await checkInventory(prisma, char_id, item_code);
+
+    if (!inventory) {
+      throw throwError("아이템을 소지하고 있지 않습니다.", 404);
+    } else if (inventory.count < count) {
+      throw throwError("수량이 부족합니다.", 400);
+    }
 
     const money = await prisma.$transaction(async (tx) => {
       // 캐릭터 소지금 변경
@@ -111,22 +103,11 @@ router.post("/sell/:char_id", authMiddleware, async (req, res, next) => {
         where: { char_id: +char_id, user_id: +user.user_id },
       });
 
-      //  인벤토리에 아이템 소지 여부
-      const isExistItem = await tx.character_inventory.findFirst({
-        where: { item_code: +item_code },
-      });
-
-      if (!isExistItem) {
-        throw throwError("아이템을 소지하고 있지 않습니다.", 404);
-      } else if (isExistItem.count < count) {
-        throw throwError("수량이 부족합니다.", 400);
-      }
-
-      if (isExistItem.count > count) {
+      if (inventory.count > count) {
         // 아이템 수량 갱신
         await tx.character_inventory.update({
           data: {
-            count: +isExistItem.count - +count,
+            count: +inventory.count - +count,
           },
           where: {
             char_id_item_code: {

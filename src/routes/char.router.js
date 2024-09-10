@@ -3,7 +3,7 @@ import { prisma } from "../utils/prisma/index.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import optionalAuthMiddleware from "../middlewares/optional.auth.middleware.js";
 import { throwError } from "../utils/utils.js";
-import jwt from "jsonwebtoken";
+import { checkChar } from "../utils/validations.js";
 
 const router = express.Router();
 
@@ -12,19 +12,19 @@ const router = express.Router();
  */
 router.post("/char", authMiddleware, async (req, res, next) => {
   const { name } = req.body;
-  const { user } = req;
+  const { user } = req.user;
 
   try {
     // 캐릭터명 중복 여부
     const isExistName = await prisma.characters.findFirst({
-      where: { name: name, user_id: user.user_id },
+      where: { name: name, user_id: user },
     });
-
     if (isExistName) throw throwError("이미 존재하는 캐릭터명입니다.", 409);
+
     const char = await prisma.characters.create({
       data: {
         name: name,
-        user_id: +user.user_id,
+        user_id: +user,
       },
     });
 
@@ -77,10 +77,7 @@ router.delete("/char/:char_id", authMiddleware, async (req, res, next) => {
 
   try {
     // 캐릭터 존재 여부
-    const char = await prisma.characters.findFirst({
-      where: { char_id: +char_id, user_id: user },
-    });
-    if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
+    await checkChar(prisma, char_id, user);
 
     // 캐릭터 삭제
     const deletedChar = await prisma.characters.delete({
@@ -107,10 +104,7 @@ router.get(
 
     try {
       // 캐릭터 존재 여부
-      const char = await prisma.characters.findFirst({
-        where: { char_id: +char_id, user_id: user },
-      });
-      if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
+      await checkChar(prisma, char_id, user);
 
       // 인벤토리의 아이템 목록 조회
       const inventory = await prisma.character_inventory.findMany({

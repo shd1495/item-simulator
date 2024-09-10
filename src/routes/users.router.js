@@ -42,7 +42,6 @@ router.post("/sign_up", async (req, res, next) => {
     const isExistUser = await prisma.users.findFirst({
       where: { id },
     });
-
     if (isExistUser) throw throwError("이미 존재하는 ID입니다.", 409);
 
     // bcrypt로 비밀번호 해싱
@@ -73,7 +72,6 @@ router.post("/sign_in", async (req, res, next) => {
     const user = await prisma.users.findFirst({
       where: { id },
     });
-
     if (!user) throw throwError("존재하지 않는 ID입니다", 404);
 
     // 해싱된 비밀번호 비교

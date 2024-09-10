@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma } from "../utils/prisma/index.js";
 import { throwError } from "../utils/utils.js";
+import { checkItem } from "../utils/validations.js";
 import Joi from "joi";
 
 const router = express.Router();
@@ -9,7 +10,7 @@ const router = express.Router();
  * 아이템 생성 API
  */
 router.post("/items", async (req, res, next) => {
-  const { item_code, item_name, item_stat, item_price } = req.body;
+  const { item_name, item_stat, item_price } = req.body;
 
   try {
     // 유효성 검사
@@ -27,8 +28,8 @@ router.post("/items", async (req, res, next) => {
     });
 
     const { error } = schema.validate(req.body); // 양식 검증
-
     if (error) throw throwError("양식에 맞게 내용을 입력해주세요.", 400);
+
     const item = await prisma.items.create({
       data: {
         item_name,
@@ -52,11 +53,7 @@ router.patch("/items/:item_code", async (req, res, next) => {
 
   try {
     // 아이템 존재 여부
-    const item = await prisma.items.findFirst({
-      where: { item_code: +item_code },
-    });
-
-    if (!item) throw throwError("아이템이 존재하지 않습니다.", 404);
+    const item = await checkItem(prisma, item_code);
 
     // 수정 사항 반영
     const updatedItem = await prisma.items.update({
@@ -105,10 +102,8 @@ router.get("/items/:item_code", async (req, res, next) => {
   try {
     const { item_code } = req.params;
 
-    const item = await prisma.items.findFirst({
-      where: { item_code: +item_code },
-    });
-    if (!item) throw throwError("아이템이 존재하지 않습니다.", 404);
+    // 아이템 존재 여부
+    const item = await checkItem(prisma, item_code);
 
     return res.status(200).json({ data: item });
   } catch (error) {
