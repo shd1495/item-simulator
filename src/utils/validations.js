@@ -7,11 +7,10 @@ import { throwError } from "../utils/utils.js";
  * @param {*} user
  * @returns { object }
  */
-export async function checkChar(prisma, char_id, user) {
+export async function checkChar(prisma, char_id, user_id) {
   const char = await prisma.characters.findFirst({
-    where: { char_id: +char_id, user_id: user },
+    where: { char_id: +char_id, user_id: +user_id },
   });
-  if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
   return char;
 }
 

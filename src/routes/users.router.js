@@ -47,7 +47,7 @@ router.post("/sign_up", async (req, res, next) => {
     // bcrypt로 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.users.create({
+    await prisma.users.create({
       data: {
         user_name,
         id,

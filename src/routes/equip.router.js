@@ -17,11 +17,11 @@ const router = express.Router();
 router.post("/equip/:char_id", authMiddleware, async (req, res, next) => {
   const { char_id } = req.params;
   const { item_code } = req.body;
-  const { user } = req.user;
+  const { user } = req;
 
   try {
     // 캐릭터 존재 여부
-    const char = await checkChar(prisma, char_id, user);
+    const char = await checkChar(prisma, char_id, user.user_id);
 
     // 인벤토리 내 아이템 존재 여부
     const inventory = await checkInventory(prisma, char_id, item_code);
@@ -96,11 +96,11 @@ router.post("/equip/:char_id", authMiddleware, async (req, res, next) => {
 router.post("/unEquip/:char_id", authMiddleware, async (req, res, next) => {
   const { char_id } = req.params;
   const { item_code } = req.body;
-  const { user } = req.user;
+  const { user } = req;
 
   try {
     // 캐릭터 존재 여부
-    const char = await checkChar(prisma, char_id, user);
+    const char = await checkChar(prisma, char_id, user.user_id);
 
     // 아이템 착용 여부
     const alreadyEquip = await checkEquip(prisma, char_id, item_code);
