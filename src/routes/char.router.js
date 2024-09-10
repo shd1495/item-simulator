@@ -51,7 +51,7 @@ router.get("/char/:char_id", optionalAuthMiddleware, async (req, res, next) => {
     if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
 
     // 인증 여부에 따른 정보 전달
-    if (user && user.user_id === char.user_id) {
+    if (user === char.user_id) {
       return res.status(200).json({
         name: char.name,
         health: char.health,
