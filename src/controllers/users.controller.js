@@ -92,6 +92,7 @@ export const login = async (req, res, next) => {
       }
     );
 
+    res.header("authorization", `Bearer ${token}`);
     return res.status(200).json({ message: "로그인에 성공했습니다.", token });
   } catch (error) {
     next(error);
