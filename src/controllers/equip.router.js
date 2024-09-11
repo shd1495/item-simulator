@@ -81,7 +81,7 @@ export const equipItem = async (req, res, next) => {
       return result;
     });
 
-    return res.status(200).json({
+    return res.status(201).json({
       message: `${char.name}이/가 ${item.item_name}을/를 장착했습니다.
            health +${item.item_stat.health} 현재 health = ${updatedChar.health}
            power +${item.item_stat.power} 현재 power = ${updatedChar.power}`,
