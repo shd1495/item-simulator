@@ -157,9 +157,10 @@ export const getCharacterEquip = async (req, res, next) => {
 
   try {
     // 캐릭터 존재 여부
-    await prisma.characters.findFirst({
+    const char = await prisma.characters.findFirst({
       where: { char_id: +char_id },
     });
+    if (!char) throw throwError("캐릭터를 찾을 수 없습니다.", 404);
 
     // 장착한 아이템 목록 조회
     const equip = await prisma.character_item.findMany({
