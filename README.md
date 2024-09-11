@@ -33,7 +33,12 @@ https://frosted-occupation-9b9.notion.site/Chapter-3-4e708ff6fe2b4cd3ab716a8d7d9
 
 ## ERD
 ![ERD](https://github.com/user-attachments/assets/b5388caf-f189-4fa0-9d5d-7e374bc46da7)
+## 트러블 슈팅 및 기능 구현 TIL
 
+1. https://alie.kr/Alj2AIb
+2. https://alie.kr/5UGIjpk
+3. https://alie.kr/GZw2XEd
+4. https://alie.kr/6taMaMx
 
 ## Q & A
 - 1. 암호화 방식
