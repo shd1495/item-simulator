@@ -62,6 +62,21 @@ export const updateItem = async (req, res, next) => {
     // 아이템 존재 여부
     const item = await checkItem(prisma, item_code);
 
+    const schema = Joi.object({
+      item_name: Joi.string()
+        .pattern(/^[가-힣\s]+$/) // 한글과 공백만 입력 가능
+        .min(2)
+        .max(12)
+        .required(),
+      item_stat: Joi.object({
+        health: Joi.number().integer().required(), // 정수만 입력 가능
+        power: Joi.number().integer().required(), // 정수만 입력 가능
+      }),
+    });
+
+    const { error } = schema.validate(req.body); // 양식 검증
+    if (error) throw throwError("양식에 맞게 내용을 입력해주세요.", 400);
+
     // 수정 사항 반영
     const updatedItem = await prisma.items.update({
       data: {
