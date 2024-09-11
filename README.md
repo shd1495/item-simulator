@@ -5,8 +5,9 @@
 - MySQL - Prisma ORM
 - JWT
 - AWS EC2
+- Yarn
 ## 실행 방법
-- 서버 - yarn run start
+- 서버 - yarn run start / pm2 start src/app.js
 - 기능 - shd1495.store:3020/api/url
 ## 필수 기능
  - [x] 회원가입 API
