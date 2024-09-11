@@ -86,7 +86,7 @@ export const updateItem = async (req, res, next) => {
  * @returns {object} Express 응답
  * @throws {Error}
  */
-export const getItemList = async (res, next) => {
+export const getItemList = async (req, res, next) => {
   try {
     // 생성된 아이템 목록 조회
     const items = await prisma.items.findMany({
