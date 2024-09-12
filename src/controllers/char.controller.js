@@ -177,9 +177,9 @@ export const getCharacterEquip = async (req, res, next) => {
     });
 
     // 장착한 아이템 데이터 가공
-    const result = equip.map((x) => ({
-      item_code: x.item_code,
-      item_name: x.item.item_name,
+    const result = equip.map((item) => ({
+      item_code: item.item_code,
+      item_name: item.item.item_name,
     }));
 
     return res.status(200).json({ data: result });
