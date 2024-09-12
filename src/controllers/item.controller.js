@@ -141,4 +141,3 @@ export const getItemDetail = async (req, res, next) => {
     next(error);
   }
 };
-asdasd;
