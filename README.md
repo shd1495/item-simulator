@@ -74,7 +74,7 @@ https://frosted-occupation-9b9.notion.site/Chapter-3-4e708ff6fe2b4cd3ab716a8d7d9
      - A, 게임으로 가정했을 때 밸런스 등에 대해 가장 근간이 되는게 아이템이기 때문에 일부 관계자만 접근할 수 있어야 합니다.
        경제적으로 생각했을 때도 아주 심각한 문제가 생길 수 있습니다.
 ---
-- 4. Htttp Status Code
+- 4. Http Status Code
      
   - Q, 과제를 진행하면서 사용한 Http Status Code를 모두 나열하고, 각각이 의미하는 것과 어떤 상황에 사용했는지 작성해 주세요.
      - Status 200 : OK 요청이 성공적으로 완료 되었을 때.
@@ -96,7 +96,7 @@ https://frosted-occupation-9b9.notion.site/Chapter-3-4e708ff6fe2b4cd3ab716a8d7d9
         - 요청 받은 캐릭터의 ID가 존재하지 않거나 아이템이 존재하지 않는 등 리소스를 찾을 수 없을 경우
           
      - Status 409 : Conflict 요청이 서버의 상태와 충돌했을 때.
-        - 이미 존재하는 ID이거나 장착 중인 아이템을 또 장착할려고 하는 등 서버 내에서 충돌이 생기는 경우
+        - 이미 존재하는 ID이거나 장착 중인 아이템을 또 장착할려고 하는 등 고유한 리소스를 또 생성하려는 경우
           
      - Status 500 : Internal Server Error 서버가 처리 방법을 알지 못할 때
         - 예기치 못한 오류가 발생했을 경우
