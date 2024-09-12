@@ -47,6 +47,7 @@ export const createCharacter = async (req, res, next) => {
 export const getCharacterDetail = async (req, res, next) => {
   const { char_id } = req.params;
   const { user } = req;
+  console.log(user);
 
   try {
     // 캐릭터 존재 여부
@@ -56,7 +57,7 @@ export const getCharacterDetail = async (req, res, next) => {
     if (!char) throw throwError("캐릭터가 존재하지 않습니다.", 404);
 
     // 인증 여부에 따른 정보 전달
-    if (user.user_id === char.user_id) {
+    if (user && user.user_id == char.user_id) {
       return res.status(200).json({
         name: char.name,
         health: char.health,

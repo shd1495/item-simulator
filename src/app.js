@@ -1,6 +1,5 @@
 import express from "express";
 import errorHandlingMiddleware from "./middlewares/error.handling.middleware.js";
-import cookieParser from "cookie-parser";
 import UsersRouter from "./routes/users.router.js";
 import CharRouter from "./routes/char.router.js";
 import ItemRouter from "./routes/item.router.js";
@@ -14,7 +13,6 @@ const app = express();
 const PORT = 3020;
 
 app.use(express.json());
-app.use(cookieParser());
 
 app.use("/api", [
   UsersRouter,
